@@ -3,7 +3,6 @@ pipeline:
     label: any
 
   stages:
-
     - name: 'List Directory'
       steps:
         - bat: 'dir'  # Run the 'dir' command and capture its output
