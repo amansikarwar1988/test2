@@ -1,34 +1,49 @@
 pipeline:
   agent:
-    label: 'windows'
+    label: 'windows'  # Ensure this matches the label of your Windows node
+
+  environment:
+    JAVA_HOME: 'JDK 11'
+    PATH: "${JAVA_HOME}\\bin;${PATH}"
 
   stages:
-  
-    - stage: 'List Directory'
+    - name: 'Checkout'
+      steps:
+        - checkout:
+            scm:
+              git:
+                url: 'https://github.com/amansikarwar1988/test2'
+                branch: 'main'
+
+    - name: 'List Directory'
       steps:
         - bat: 'dir'  # Run the 'dir' command and capture its output
           id: listDirectory  # Optional: Step ID for reference
 
-    - stage: 'Build'
+    - name: 'Build'
       steps:
         - bat: 'mvn -B package'  # Build the project using Maven
 
-    - stage: 'Test'
+    - name: 'Test'
       steps:
         - bat: 'mvn test'  # Run tests using Maven
 
-    - stage: 'Run'
+    - name: 'Run'
       steps:
         - script:
-            bat: |
+            script: |
               start /B cmd /c "mvn spring-boot:run"
               echo "Waiting for Spring Boot application to start..."
               timeout /t 30 > nul
               :: Check if the application is running
-              curl -s -o NUL -w "%{http_code}" http://localhost:8082/
+              curl -s -o NUL -w "%{http_code}" http://localhost:8080/
 
   post:
     success:
-      echo: 'Pipeline succeeded!'
+      script:
+        script: |
+          echo 'Pipeline succeeded!'
     failure:
-      echo: 'Pipeline failed!'
+      script:
+        script: |
+          echo 'Pipeline failed!'
