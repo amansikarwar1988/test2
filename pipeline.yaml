@@ -1,10 +1,6 @@
 pipeline:
   agent:
-    label: 'windows'  # Ensure this matches the label of your Windows node
-
-  environment:
-    JAVA_HOME: 'JDK 11'
-    PATH: "${JAVA_HOME}\\bin;${PATH}"
+    label: 'any'  # Ensure this matches the label of your Windows node
 
   stages:
     - name: 'Checkout'
