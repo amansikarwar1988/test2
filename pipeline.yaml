@@ -2,14 +2,7 @@ pipeline:
   agent: any
 
   stages:
-    - stage: 'Checkout'
-      steps:
-        - checkout:
-            scm:
-              git:
-                url: 'https://github.com/amansikarwar1988/test2'
-                branch: 'main'
-
+  
     - stage: 'List Directory'
       steps:
         - bat: 'dir'  # Run the 'dir' command and capture its output
