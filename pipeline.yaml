@@ -1,6 +1,6 @@
 pipeline:
   agent:
-    label: 'any'  # Ensure this matches the label of your Windows node
+    label: any
 
   stages:
     - name: 'Checkout'
