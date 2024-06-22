@@ -1,0 +1,40 @@
+pipeline:
+  agent: any
+
+  stages:
+    - stage: 'Checkout'
+      steps:
+        - checkout:
+            scm:
+              git:
+                url: 'https://github.com/amansikarwar1988/test2'
+                branch: 'main'
+
+    - stage: 'List Directory'
+      steps:
+        - bat: 'dir'  # Run the 'dir' command and capture its output
+          id: listDirectory  # Optional: Step ID for reference
+
+    - stage: 'Build'
+      steps:
+        - bat: 'mvn -B package'  # Build the project using Maven
+
+    - stage: 'Test'
+      steps:
+        - bat: 'mvn test'  # Run tests using Maven
+
+    - stage: 'Run'
+      steps:
+        - script:
+            bat: |
+              start /B cmd /c "mvn spring-boot:run"
+              echo "Waiting for Spring Boot application to start..."
+              timeout /t 30 > nul
+              :: Check if the application is running
+              curl -s -o NUL -w "%{http_code}" http://localhost:8082/
+
+  post:
+    success:
+      echo: 'Pipeline succeeded!'
+    failure:
+      echo: 'Pipeline failed!'
