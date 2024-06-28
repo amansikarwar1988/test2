@@ -1,10 +1,70 @@
-pipeline { 
-    agent any  
-    stages { 
-        stage('Build') { 
-            steps { 
-               echo 'This is a minimal pipeline.' 
+pipeline {
+    agent any
+
+    environment {
+        MAIN_BRANCH = 'main'
+        DEV_BRANCH = 'dev'
+        REPO_URL = 'https://github.com/amansikarwar1988/test2.git' // Replace with your repository URL
+    }
+
+    stages {
+        stage('Checkout Main Branch') {
+            steps {
+                script {
+                    // Clone the repository and checkout the main branch
+                    git url: env.REPO_URL, branch: env.MAIN_BRANCH
+                }
+            }
+        }
+
+        stage('Fetch All Branches') {
+            steps {
+                script {
+                    // Fetch all branches
+                    sh 'git fetch --all'
+                }
+            }
+        }
+
+        stage('Compare Branches') {
+            steps {
+                script {
+                    // Compare main branch with dev branch and save the diff
+                    sh """
+                        git checkout ${env.DEV_BRANCH}
+                        git checkout ${env.MAIN_BRANCH}
+                        git diff ${env.MAIN_BRANCH} ${env.DEV_BRANCH} > changes.diff
+                    """
+                }
+            }
+        }
+
+        stage('Create Changes Directory') {
+            steps {
+                script {
+                    // Create a directory for changes and move the diff file there
+                    sh """
+                        mkdir -p changes
+                        mv changes.diff changes/
+                    """
+                }
+            }
+        }
+
+        stage('Archive Changes') {
+            steps {
+                // Archive the changes directory to make it available as a build artifact
+                archiveArtifacts artifacts: 'changes/**', allowEmptyArchive: true
+            }
+        }
+        stage('Copy files to VM') {
+            steps {
+                echo 'Copy to VM'
+                sshagent(['jenkins-on-gcp']) {
+                     sh "scp -r ./changes/ root@34.42.23.121:/root"
+                }
             }
         }
     }
+
 }
